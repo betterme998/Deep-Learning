@@ -67,7 +67,113 @@ def _download(file_name):
     f.write(request)
   print("Done")
 
+
 def download_mnist():
   """"下载所有必须的MNIST数据文件"""
   for v in key_file.values():
     _download(v)
+
+def _load_label(file_name):
+  """
+  从.gz压缩文件中加载标签数据，并转换为NumPy数组
+  参数:
+      file_name: 标签文件名（如 'train-labels-idx1-ubyte.gz'）
+  返回:
+      labels: 一维NumPy数组，元素为0~9的整数标签
+  """
+  file_path = dataset_dir + "/" + file_name
+
+  print("Converting" + file_name + "to NumPy Array ...")
+  # 以二进制读模式打开gzip压缩文件
+  with gzip.open(file_path, 'rb') as f:
+    # 标签文件格式：前8个字节是文件头信息（魔数，标签数量等，之后才是真正的标签数据）
+    # np.frombuffer 用于将一段字节缓冲区直接解释为一维数组，不复制数据（只创建视图）。
+    # 参数一：缓冲区，这里是 f.read() 返回的 bytes 对象。
+    # 参数二：dtype=np.uint8 表示每个标签占用1个字节，被解释为一个 0–255 的无符号整数（8 位）
+    # 参数三：offset=8 表示跳过前8个字节，从第9个字节开始读取
+    labels = np.frombuffer(f.read(), np.uint8, offset=8)
+  print("Done")
+  return labels
+
+
+def _load_img(file_name):
+  """
+  从.gz压缩文件中加载图像数据，并转化为NumPy数组
+  参数：
+    file_name: 图像文件名（如 'train-images-idx3-ubyte.gz'）
+  返回：
+    data: 二维NumPy数组，形状为（样本数, 784）,每个元素是0~255的像素值
+  """ 
+  file_path = dataset_dir + "/" + file_name
+
+  print("converting" + file_path + "to NumPy Array ...")
+  with gzip.open(file_path, 'rb') as f:
+    # 图像文件格式：前16个字节是文件头信息（魔数,图像数量，行数，列数等）
+    # offset=16 表示跳过这16个字节，直接读取像素数据
+    data = np.frombuffer(f.read(), np.uint8, offset=16)
+  # 将一维像素数组重塑为二维：（样本数，784）
+  # -1 表示自动计算样本数量， img_size = 784  
+  data = data.reshape(-1, img_size)
+  print("Done")
+  return data
+
+def _convert_numpy():
+  """
+  将下载的原始文件转换为NumPy数组，并组织成字典格式
+  返回：
+    dataset:包含四个键的字典：
+      'train_img'   : 训练图像数组
+      'train_label' : 训练标签数组
+      'test_img'    : 测试图像数组
+      'test_label'  : 测试标签数组
+  """
+  dataset = {}
+  dataset['train_img'] = _load_img(key_file['train_img'])
+  dataset['train_label'] = _load_label(key_file['test_label'])
+  dataset['test_img'] = _load_img(key_file['test_img'])
+  dataset['test_label'] = _load_label(key_file['test_label'])
+  return dataset
+
+def init_mnist():
+  """
+  初始化MNIST数据集：
+  1.下载所有原始压缩文件（如未下载）
+  2.将其转换为NumPy数组
+  3.将所有数据保存为一个pickle文件，便于后续快速加载
+  """
+  download_mnist()
+  dataset = _convert_numpy()
+  print("Creating pickle file...")
+  # 以二进制写模式打开pickle文件
+  with open(save_file, 'wb') as f:
+    # pickle.dump将Python对象序列化并写入文件，参数 -1 表示使用最高效的协议
+    pickle.dump(dataset, f, -1)
+  print("Done!")
+
+def _change_one_hot_label(X):
+  """
+  将标签数组转换为one-hot编码格式
+  参数：
+    X：一维整数标签数组，形状为(N,)
+  返回：
+    T：二维数组，形状为(N, 10)，每行只有一个位置为1，其余为0
+    例如标签5转换为 [0.,0.,0.,0.,0.,1.,0.,0.,0.,0.]
+
+  One-hot 编码是一种将分类变量（离散标签）转换为数值向量的方法，
+  目的是让机器学习算法能够正确处理非数值型的类别信息，
+  同时避免引入虚假的“大小关系”。
+  向量长度 = 类别总数。
+  每个向量中只有一位是 1，其余全是 0，“One-hot”即“独热”——仅有一个位置被激活  
+  """
+
+  # X 存放所有样本真实标签的一维数组[3, 7, 0, 2, ...]
+  # T 全零二维数组，准备填充为 One-hot 矩阵
+  # row 在循环中代表 T 的当前行（一个一维数组） # 
+  # X[idx] 第 idx 个样本的真实标签（一个整数）	比如 3
+  # np.zeros 是 NumPy 库中用于创建全零数组的核心函数。它生成一个指定形状和数据类型的新数组，所有元素的值初始化为 0（或 0.0）。
+  T = np.zeros((X.size, 10))
+  #enumerate(T) 返回一个迭代器，每次迭代生成一个元组 (索引, 元素)
+  for idxm, row in enumerate(T):
+    # 第idx个样本的标签未 X[idx],将该行对应列设置为1
+    row[X[idxm]] = 1
+  return T
