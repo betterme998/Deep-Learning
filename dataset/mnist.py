@@ -175,5 +175,63 @@ def _change_one_hot_label(X):
   #enumerate(T) 返回一个迭代器，每次迭代生成一个元组 (索引, 元素)
   for idxm, row in enumerate(T):
     # 第idx个样本的标签未 X[idx],将该行对应列设置为1
+    # row[x]这里面拿到的是：循环到的[0,0,0,0,0,0,0,0]
+    # X[idxm]：idxm是循环到的索引，X是真实标签[3, 7, 0, 2, ...]
+    # 如X[0] = 3,与之对应的T[0][3]=[0,0,0,1,0,0,0,0,0,0]
     row[X[idxm]] = 1
   return T
+
+def load_mnist(normalize=True, flatten=True, one_hot_label=False):
+  """
+  MNIST数据集的加载函数（主入口）
+
+  参数：
+  ----------
+  normalize: bool
+    若为True， 将图像像素值从[0, 255]归一化到[0.0, 1.0]
+
+  flatten: bool
+    若为True,图像数据为一维数组(784,);
+    若为False,图像保持二维形状(1, 28, 28),适合CNN（卷积神经网络）输入
+
+  one_hot_label: bool
+  若为True，标签以one-hot编码形式返回
+  若为False，标签为原始整数0~9
+
+  返回：
+  ----------
+  （训练图像，训练标签），（测试图像，测试标签）
+  """
+  # 如果pickle文件不存在，先执行初始化流程（下载+转换+保存）
+  if not os.path.exists(save_file):
+    init_mnist()
+
+  # 从pickle文件中加载已处理好的数据集字典
+  with open(save_file, 'rb') as f:
+    dataset = pickle.load(f)
+
+  # 归一化：将像素值从0——255收缩到0.0~1.0
+  if normalize:
+    for key in ('train_img', 'test_img'):
+      dataset[key] = dataset[key].astype(np.float32) #转换为浮点数
+      dataset[key] /= 255.0
+
+  # 是否转换为one-hot标签
+  if one_hot_label:
+    dataset['train_label'] = _change_one_hot_label(dataset['train_label'])
+    dataset['test_label'] = _change_one_hot_label(dataset['test_label'])
+
+  # 是否保持图像原始形状（不展平）
+  if not flatten:
+    # 重塑为（样本数，通道数，高，宽）的格式
+    for key in ('train_img', 'test_img'):
+      dataset[key] = dataset[key].reshape(-1, 1, 28, 28)
+
+  # 返回训练数据和测试数据元组
+  return (dataset['train_img'], dataset['train_label']), (dataset['test_img'], dataset['test_label'])
+
+# 如果直接运行此脚步，则执行初始化操作（下载并生成pickle文件）
+if __name__ == '__main__':
+  init_mnist()
+
+  
