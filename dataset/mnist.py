@@ -64,7 +64,7 @@ def _download(file_name):
 
   # 将下载内容写入本地文件（'wb'模式表示二进制写入）
   with open(file_path, mode='wb') as f:
-    f.write(request)
+    f.write(response)
   print("Done")
 
 
