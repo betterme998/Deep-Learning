@@ -36,6 +36,7 @@ def img_show(img):
 # 加载MNIST数据集
 # flatten=True: 将28x28的图像展平为一维数组（长度784），方便作为全连接网络的输入
 # normalize=False: 不进行归一化，像素值保持原始的0~255整数，便于直接显示
+# (训练图像,训练标签)，(测试图像，测试标签)”的形式返回读入的MNIST数据
 (x_train, t_train), (x_test, t_test) = load_mnist(flatten=True, normalize=False)
 
 #取出第一张训练图像及其对应的标签
