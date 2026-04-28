@@ -31,6 +31,29 @@ def cross_entropy_error(y, t):
     y = y.reshape(1, y.size)
 
   batch_size = y.shape[0]
-  return -np.sum(np.log([np.arange(batch_size, t)] + 1e-7)) / batch_size
+  """
+  y[np.arange(batch_size, t)]到底取了什么？
+  # y是神经网络的输出
+  假设我们批有100个样本，共有10个类别，那么y的形状是(100, 10)
+  样本0: [0.1, 0.2,... 0.6, 0.1]   ← 类别0~3的概率
+  样本1: [0.3, 0.4,... 0.1, 0.2]
+  ...
+  样本100: [0.1, 0.1, ...0.1, 0.7]
+
+  t是真实标签的类别索引，形状(100,)
+  t = [2, 7, 3, ..., 5]
+  意思是：t[i]表示样本i的真实概率最高的类别
+
+  那么y[np.arange(batch_size, t)]等价于
+  y[0, 2]
+  y[1, 7]
+  ...
+  y[100, 5] 前一项是样本索引，后一项是真实标签的类别索引(就是最高概率的那个)
+  取出来的是一个数组[0.6,0.4,...,0.7]
+
+  这里的t只是为了取出y中对应真实标签的概率
+  np
+  """
+  return -np.sum(np.log(y[np.arange(batch_size, t)] + 1e-7)) / batch_size
 
 
