@@ -11,7 +11,7 @@ def sigmoid(x):#激活函数
   return np.where(x >= 0,
                   1 / (1 + np.exp(-x)), #此时exp(-x) <= 1
                   np.exp(x) / (1 + np.exp(x))) #此时exp(x) < 1
-def sigmoid_grad(x):
+def sigmoid_grad(x): #是 sigmoid 函数的导数（梯度），用来计算 sigmoid 函数在某一点的斜率。
     return (1.0 - sigmoid(x)) * sigmoid(x)
 # 常用于多分类任务中，把一组实数转换成概率分布（所有输出在0到1之间且和为1）
 def softmax(x):#激活函数

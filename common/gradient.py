@@ -31,7 +31,7 @@ def numerical_gradient_2d(f, X):
     return grad
   
 
-def numerical_gradient(f, x):
+def numerical_gradient(f, x): #损失函数关于最后一层激活函数输出值的梯度
   h = 1e-4                  #0.0001 # 微小变化量，用于计算数值微分
   grad = np.zeros_like(x)   #初始化梯度数组，形状与 x 相同，元素全为0
 

@@ -49,7 +49,7 @@ class TwoLayerNet:
   
   def loss(self, x, t):
     """
-    计算交叉熵损失
+    计算交叉熵损失函数的值
     参数：
       x: 输入数据，形状为（batch_size, input_size）
       t: 监督标签 （one-hot编码）, 形状为（batch_size, output_size）
@@ -119,12 +119,19 @@ class TwoLayerNet:
 
     # ----- 反向传播 -----
     # softmax与交叉熵误差的联合梯度简化为 (y - t) / batch_num
-    dy = (y - t) / batch_num
+    dy = (y - t) / batch_num # 损失对输出层 softmax 输入的梯度（softmax接收的参数）
     # 输出层权重梯度：W2的梯度 = 隐藏层输出转置 * 上游梯度
     grads['W2'] = np.dot(z1.T, dy) # 所以 z1.T 就是通过转置，让前一层激活值与当前层梯度在样本维度上正确对齐，从而一次性算出所有权重的累积梯度。
     # 输出层偏置梯度：b2的梯度 = 上游梯度按样本求和
     grads['b2'] = np.sum(dy, axis=0)
 
     # 向隐藏层反向传播
-    dz1 = np.dot(dy, W2.T)    ## 传到sigmoid前的梯度
-    da1 = sigmoid_grad(a1) * dz1
+    dz1 = np.dot(dy, W2.T)    ## 传到sigmoid前的梯度 损失对隐藏层 sigmoid 输出的梯度
+    da1 = sigmoid_grad(a1) * dz1 # 损失对隐藏层加权和的梯度
+
+    #输入层到隐藏层的权重梯度
+    grads['W1'] = np.dot(x.T, da1)
+    #隐藏层偏置梯度
+    grads['b1'] = np.sum(da1, axis=0)
+
+    return grads 
