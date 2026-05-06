@@ -9,6 +9,9 @@ import numpy as np
 
 class TwoLayerNet:
   """两层全连接神经网络（输入层-隐藏层-输出层）"""
+  #这个初始化方法会对权重参数进行初始化。如何设置权重参数的初始值这个问题是关系到神经网络能否成功学习的重要问题
+  #权重使用符合高斯分布的随机数进行初始化
+  #偏置使用0进行初始化
 
   def __init__(self, input_size, hidden_size, output_size, weight_init_std=0.01):
     """
@@ -19,7 +22,7 @@ class TwoLayerNet:
       output_size: 输出层神经元个数（类别数）
       weight_init_std: 权重初始化的标准差，默认0.01
     """
-    self.params = {}
+    self.params = {} #保存神经网络的参数的字典型变量（实例变量）。
     # W1: 输入层到隐藏层权重，形状为 (input_size, hidden_size)
     self.params['W1'] = weight_init_std * np.random.randn(input_size, hidden_size)
     # b1:隐藏层偏置，形状为 (hidden_size,)并用零填充
@@ -32,6 +35,7 @@ class TwoLayerNet:
   def predict(self, x):
     """
     前向传播，计算输出预测值
+    进行识别（推理）。参数x是图像数据
     参数：
       x: 输入数据，形状为（batch_size, input_size）(如一百张照片，照片大小为28*28)
     返回：
@@ -50,6 +54,8 @@ class TwoLayerNet:
   def loss(self, x, t):
     """
     计算交叉熵损失函数的值
+    计算损失函数的值。
+    参数x是图像数据，t是正确解标签
     参数：
       x: 输入数据，形状为（batch_size, input_size）
       t: 监督标签 （one-hot编码）, 形状为（batch_size, output_size）
@@ -75,7 +81,7 @@ class TwoLayerNet:
     accuracy = np.sum(y == t) / float(x.shape[0])
     return accuracy
   
-  def numerical_gradient(self, x, t):
+  def numerical_gradient(self, x, t): # 计算权重参数的梯度
     """
     使用数值微分计算梯度（速度慢，主要用于梯度准确性检查）
     参数：
@@ -88,7 +94,7 @@ class TwoLayerNet:
     #定义以损失函数值为输出的函数，用于数值微分
     loss_W = lambda W: self.loss(x, t)
 
-    grads = {}
+    grads = {} # 保存梯度的字典型变量（numerical_gradient()方法的返回值）。
     grads['W1'] = numerical_gradient(loss_W, self.params['W1'])
     grads['b1'] = numerical_gradient(loss_W, self.params['b1'])
     grads['W2'] = numerical_gradient(loss_W, self.params['W1'])
@@ -96,7 +102,7 @@ class TwoLayerNet:
 
     return grads
   
-  def gradient(self, x, t):
+  def gradient(self, x, t): # 计算权重参数的梯度。
     """
     使用误差反向传播算法高速计算梯度
     参数：
@@ -135,3 +141,10 @@ class TwoLayerNet:
     grads['b1'] = np.sum(da1, axis=0)
 
     return grads 
+
+if __name__ == '__main__':
+  net = TwoLayerNet(input_size=784, hidden_size=100, output_size=10)
+  print(net.params['W1'].shape) # (784, 100)
+  print(net.params['b1'].shape) # (784, 100)
+  print(net.params['W2'].shape) # (100, 10)
+  print(net.params['b2'].shape) # (10,)

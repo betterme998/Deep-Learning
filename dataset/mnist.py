@@ -129,7 +129,7 @@ def _convert_numpy():
   """
   dataset = {}
   dataset['train_img'] = _load_img(key_file['train_img'])
-  dataset['train_label'] = _load_label(key_file['test_label'])
+  dataset['train_label'] = _load_label(key_file['train_label'])
   dataset['test_img'] = _load_img(key_file['test_img'])
   dataset['test_label'] = _load_label(key_file['test_label'])
   return dataset
