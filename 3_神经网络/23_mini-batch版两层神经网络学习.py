@@ -10,6 +10,7 @@ mini-batch版2层神经网络（隐藏层为1层的网络）为对象，使用MN
 移
 """
 import sys, os
+from tqdm import tqdm
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))# 将父目录加入路径，以便导入common文件夹中的模块
 import numpy as np
 import matplotlib.pyplot as plt
@@ -35,10 +36,10 @@ train_acc_list = []           # 每个epoch的训练准确率
 test_acc_list = []            # 每个epoch的测试准确率
 
 # 计算每个epoch对应的迭代次数（一个epoch定义为完整遍历一次训练集所需的迭代次数）
-iter_per_epoch = max(train_size/batch_size, 1)
+iter_per_epoch = max(train_size // batch_size, 1)
 
 # 开始训练循环
-for i in range(iters_num):# 获取mini-atch
+for i in tqdm(range(iters_num)):# 获取mini-atch
   # 从训练集中随机选取batch_size个样本（Mini-batch学习）
   batch_mask = np.random.choice(train_size, batch_size)
   x_batch = x_train[batch_mask] # 批量输入数据
@@ -58,7 +59,7 @@ for i in range(iters_num):# 获取mini-atch
 
   # 每个epoch结束时，计算并记录训练集合和测试集的准确率
   if i % iter_per_epoch == 0:
-    train_acc = network.accuracy(x_batch, t_batch)
+    train_acc = network.accuracy(x_train, t_train)  # 使用整个训练集计算epoch准确率
     test_acc = network.accuracy(x_test, t_test)
     train_acc_list.append(train_acc)
     test_acc_list.append(test_acc)

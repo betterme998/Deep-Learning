@@ -97,7 +97,7 @@ class TwoLayerNet:
     grads = {} # 保存梯度的字典型变量（numerical_gradient()方法的返回值）。
     grads['W1'] = numerical_gradient(loss_W, self.params['W1'])
     grads['b1'] = numerical_gradient(loss_W, self.params['b1'])
-    grads['W2'] = numerical_gradient(loss_W, self.params['W1'])
+    grads['W2'] = numerical_gradient(loss_W, self.params['W2'])
     grads['b2'] = numerical_gradient(loss_W, self.params['b2'])
 
     return grads

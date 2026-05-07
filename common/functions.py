@@ -36,9 +36,17 @@ def cross_entropy_error(y, t): #mini-batch版交叉熵损失函数
   if y.ndim == 1: #判断是否为一维数组 #ndim数组维度
     t = t.reshape(1, t.size) #将t转换为1行,t.size列的二维数组,y是神经网络的输出
     y = y.reshape(1, y.size) #将y转换为1行,y.size列的二维数组,t是监督数据
+  
+  batch_size = y.shape[0] # 获取y的行数，即批量大小（求平均值）
+  # 如果 t 是二维（one‑hot 标签）
+  if t.ndim == 2:
+    return -np.sum(t * np.log(y + 1e-7)) / batch_size
+  else:
+    # 一维整数标签，用索引方式取对应列的预测概率
+    return -np.sum(np.log(y[np.arange(batch_size), t] + 1e-7)) / batch_size
+    
     """
     y的维度为1时，即求单个数据的交叉熵误差时，需要改变数据的形状。
     当输入为mini-batch时，要用batch的个数进行正规化，计算单个数据的平均交叉熵误差。
     """
-  batch_size = y.shape[0] # 获取y的行数，即批量大小（求平均值）
-  return -np.sum(np.log(y[np.arange(batch_size), t] + 1e-7)) / batch_size
+  
