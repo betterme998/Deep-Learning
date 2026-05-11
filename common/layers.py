@@ -1,5 +1,5 @@
 """
-
+激活函数层的正反向传播
 """
 import numpy as np
 from common.functions import *
