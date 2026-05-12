@@ -30,5 +30,26 @@ class TwoLayerNet:
       x = layer.forward(x)
     
     return x
-    
+  
+  # x: 输入数据, t:监督数据
+  def loss(self, x, t):
+    y = self.predict(x)
+    return self.lastLayer.forward(y, t)
+  
+  def accuracy(self, x, t):
+    y = self.predict(x)
+    y = np.argmax(y, axis=1)
+    if t.ndim != 1 : t = np.argmax(t, axis=1)
+    accuracy = np.sum(y == t) / float(x.shape[0])
+    return accuracy
+
+  # x: 输入数据, t:监督数据
+  def numerical_gradient(self, x, t):
+    loss_W = lambda W: self.loss(x, t)   
+
+    grads = {}
+    grads['W1'] = numerical_gradient(loss_W, self.params['W1']) 
+    grads['b1'] = numerical_gradient(loss_W, self.params['b1'])
+    grads['W2'] = numerical_gradient(loss_W, self.params['W2'])
+    grads['b2'] = numerical_gradient(loss_W, self.params['b2'])
 
