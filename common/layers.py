@@ -155,7 +155,7 @@ class SoftmaxWithLoss: #Softmax 层和损失层
     # 计算 softmax：将得分转换为概率
     self.y = softmax(x)
     # 计算交叉熵误差
-    self.loss = cross_entropy_error
+    self.loss = cross_entropy_error(self.y, self.t)
 
     return self.loss
   
